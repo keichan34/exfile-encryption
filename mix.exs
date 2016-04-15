@@ -8,7 +8,13 @@ defmodule ExfileEncryption.Mixfile do
       elixir: "~> 1.2",
       build_embedded: Mix.env == :prod,
       start_permanent: Mix.env == :prod,
-      deps: deps
+      deps: deps,
+      source_url: "https://github.com/keichan34/exfile-encryption",
+      docs: [
+        extras: ["README.md"]
+      ],
+      package: package,
+      description: description
    ]
   end
 
@@ -25,7 +31,27 @@ defmodule ExfileEncryption.Mixfile do
 
   defp deps do
     [
-      {:exfile, "~> 0.2.3"}
+      {:exfile, "~> 0.2.3"},
+      {:earmark, "~> 0.1", only: :dev},
+      {:ex_doc, "~> 0.11", only: :dev}
     ]
+  end
+
+  defp package do
+    [
+      files: ["lib", "mix.exs", "README.md", "LICENSE.txt"],
+      maintainers: ["Keitaroh Kobayashi"],
+      licenses: ["MIT"],
+      links: %{
+        "GitHub" => "https://github.com/keichan34/exfile-encryption",
+        "Docs" => "http://hexdocs.pm/exfile_encryption/readme.html"
+      }
+    ]
+  end
+
+  defp description do
+    """
+    Encryption processors for Exfile.
+    """
   end
 end
