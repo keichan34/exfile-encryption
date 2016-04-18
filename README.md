@@ -42,8 +42,8 @@ config :exfile, Exfile,
       directory: "/var/lib/my-store",
       max_size: nil,
       hasher: Exfile.Hasher.Random,
-      preprocessors: [{"encrypt", [key: "don't tell anyone!"]}],
-      postprocessors: [{"decrypt", [key: "don't tell anyone!"]}]
+      preprocessors: [{"encrypt", [], [key: "don't tell anyone!"]}],
+      postprocessors: [{"decrypt", [], [key: "don't tell anyone!"]}]
     }]
   }
 ```

@@ -13,11 +13,17 @@ defmodule ExfileEncryption.DecryptTest do
 
     path = EETH.fixture_path("version_1_encrypted.bin")
     file = %LocalFile{path: path}
-    {:ok, decrypted_file} = ExfileEncryption.Decrypt.call(file, [key: @encryption_key], [])
+    {:ok, decrypted_file} = ExfileEncryption.Decrypt.call(file, [], [key: @encryption_key])
 
     {:ok, decrypted_f} = LocalFile.open(decrypted_file)
     decrypted_text = IO.binread(decrypted_f, :all)
 
     assert plaintext == decrypted_text
+  end
+
+  test "raises an error if a key is not provided" do
+    assert_raise ArgumentError, "decrypt requires a key", fn ->
+      ExfileEncryption.Decrypt.call(nil, [], [])
+    end
   end
 end

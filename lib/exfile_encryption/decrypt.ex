@@ -8,9 +8,12 @@ defmodule ExfileEncryption.Decrypt do
   alias Exfile.LocalFile
   import ExfileEncryption.Utilities
 
-  def call(file, args ,_opts) do
+  def call(file, _args, opts) do
+    key = Keyword.get(opts, :key) ||
+      raise(ArgumentError, message: "decrypt requires a key")
+
     with  {:ok, f} <- LocalFile.open(file),
-          do: do_decrypt(IO.binread(f, 1), f, args)
+          do: do_decrypt(IO.binread(f, 1), f, key)
   end
 
   defp do_decrypt(:eof, f, _) do
@@ -21,10 +24,7 @@ defmodule ExfileEncryption.Decrypt do
     File.close(f)
     error
   end
-  defp do_decrypt(<<1>>, f, args) do
-    key = Keyword.get(args, :key) ||
-      raise(ArgumentError, message: "decrypt requires a key")
-
+  defp do_decrypt(<<1>>, f, key) do
     <<tag_byte_size>> = IO.binread(f, 1)
     tag = IO.binread(f, tag_byte_size)
     <<iv_byte_size>> = IO.binread(f, 1)

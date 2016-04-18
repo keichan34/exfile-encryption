@@ -10,18 +10,19 @@ defmodule ExfileEncryption.Encrypt do
 
   @file_version 1
 
-  def call(file, args, _opts) do
+  def call(file, _args, opts) do
+    key = Keyword.get(opts, :key) ||
+      raise(ArgumentError, message: "encrypt requires a key")
+
     with  {:ok, f} <- LocalFile.open(file),
-          do: do_encrypt(IO.binread(f, :all), args)
+          do: do_encrypt(IO.binread(f, :all), key)
   end
 
   defp do_encrypt(:eof, _),
     do: {:error, :eof}
   defp do_encrypt({:error, _} = error, _),
     do: error
-  defp do_encrypt(iodata, args) do
-    key = Keyword.get(args, :key) ||
-      raise(ArgumentError, message: "encrypt requires a key")
+  defp do_encrypt(iodata, key) do
     iv = generate_iv
     encrypted = encrypt_data(iodata, key, iv)
     {:ok, write_to_local_file(encrypted, iv)}

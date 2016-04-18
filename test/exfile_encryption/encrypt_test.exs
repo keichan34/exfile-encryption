@@ -12,13 +12,19 @@ defmodule ExfileEncryption.EncryptTest do
     end
 
     file = %LocalFile{path: path}
-    {:ok, encrypted_file} = ExfileEncryption.Encrypt.call(file, [key: @encryption_key], [])
+    {:ok, encrypted_file} = ExfileEncryption.Encrypt.call(file, [], [key: @encryption_key])
 
-    {:ok, decrypted_file} = ExfileEncryption.Decrypt.call(encrypted_file, [key: @encryption_key], [])
+    {:ok, decrypted_file} = ExfileEncryption.Decrypt.call(encrypted_file, [], [key: @encryption_key])
 
     {:ok, decrypted_f} = LocalFile.open(decrypted_file)
     decrypted_text = IO.binread(decrypted_f, :all)
 
     assert plaintext == decrypted_text
+  end
+
+  test "raises an error if a key is not provided" do
+    assert_raise ArgumentError, "encrypt requires a key", fn ->
+      ExfileEncryption.Encrypt.call(nil, [], [])
+    end
   end
 end
