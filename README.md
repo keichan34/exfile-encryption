@@ -12,7 +12,7 @@ ExfileEncryption uses AES-GCM in 256-bit key mode. The file format is [documente
 
 ```elixir
 def deps do
-  [{:exfile_encryption, "~> 0.0.1"}]
+  [{:exfile_encryption, "~> 0.0.2"}]
 end
 ```
 
