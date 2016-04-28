@@ -2,11 +2,13 @@
 
 [![Build Status](https://travis-ci.org/keichan34/exfile-encryption.svg?branch=master)](https://travis-ci.org/keichan34/exfile-encryption)
 
-Encryption for Exfile files.
+Transparent backend encryption / decryption for [Exfile](https://github.com/keichan34/exfile).
+
+ExfileEncryption uses AES-GCM in 256-bit key mode. The file format is [documented](https://hexdocs.pm/exfile_encryption/file_format_1.html).
 
 ## Installation
 
-1. Add exfile_encryption to your list of dependencies in `mix.exs`:
+1. Add `exfile_encryption` to your list of dependencies in `mix.exs`:
 
 ```elixir
 def deps do
@@ -14,7 +16,7 @@ def deps do
 end
 ```
 
-2. Ensure exfile_encryption is started before your application:
+2. Ensure `exfile_encryption` is started before your application:
 
 ```elixir
 def application do
@@ -38,12 +40,12 @@ Sample configuration of a backend that uses `exfile_encryption` to encrypt files
 ```elixir
 config :exfile, Exfile,
   backends: %{
-    "store" => [Exfile.Backend.FileSystem, %{
+    "store" => {Exfile.Backend.FileSystem,
       directory: "/var/lib/my-store",
       max_size: nil,
       hasher: Exfile.Hasher.Random,
       preprocessors: [{"encrypt", [], [key: "don't tell anyone!"]}],
       postprocessors: [{"decrypt", [], [key: "don't tell anyone!"]}]
-    }]
+    }
   }
 ```

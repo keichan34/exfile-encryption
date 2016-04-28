@@ -11,7 +11,7 @@ defmodule ExfileEncryption.Mixfile do
       deps: deps,
       source_url: "https://github.com/keichan34/exfile-encryption",
       docs: [
-        extras: ["README.md"]
+        extras: ["README.md", "FILE_FORMAT_1.md"]
       ],
       package: package,
       description: description
