@@ -26,10 +26,16 @@ end
 
 ## Usage
 
-`exfile_encryption` registers two processors. Each recieves a single argument, `key`, with the encryption key.
+`exfile_encryption` registers two processors.
 
 * `encrypt`
 * `decrypt`
+
+`encrypt` accepts a single argument, `key`: a string that will be hashed with SHA-256
+and used as the encryption key. Note that while the key is not salted, a random IV
+is generated for each file.
+
+`decrypt` accepts either `key` with a single key or a list of accepted keys in `keys`.
 
 ## Configuration
 
@@ -46,6 +52,23 @@ config :exfile, Exfile,
       hasher: Exfile.Hasher.Random,
       preprocessors: [{"encrypt", [], [key: "don't tell anyone!"]}],
       postprocessors: [{"decrypt", [], [key: "don't tell anyone!"]}]
+    }
+  }
+```
+
+Sample configuration of a backend that will encrypt newly uploaded files with one
+key, but accept multiple decryption keys. See [Issue #1](https://github.com/keichan34/exfile-encryption/issues/1)
+to see when / why this should be used.
+
+```elixir
+config :exfile, Exfile,
+  backends: %{
+    "store" => {Exfile.Backend.FileSystem,
+      directory: "/var/lib/my-store",
+      max_size: nil,
+      hasher: Exfile.Hasher.Random,
+      preprocessors: [{"encrypt", [], [key: "don't tell anyone!"]}],
+      postprocessors: [{"decrypt", [], [keys: ["don't tell anyone!", "old key"]]}]
     }
   }
 ```

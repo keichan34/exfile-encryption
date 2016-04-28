@@ -9,37 +9,33 @@ defmodule ExfileEncryption.Decrypt do
   import ExfileEncryption.Utilities
 
   def call(file, _args, opts) do
-    key = Keyword.get(opts, :key) ||
-      raise(ArgumentError, message: "decrypt requires a key")
+    keys = keys_from_opts(opts)
 
-    with  {:ok, f} <- LocalFile.open(file),
-          do: do_decrypt(IO.binread(f, 1), f, key)
+    with  {:ok, f}    <- LocalFile.open(file),
+          {:ok, data} <- read_data(f),
+          :ok         <- File.close(f),
+          do: do_decrypt(data, keys)
   end
 
-  defp do_decrypt(:eof, f, _) do
-    File.close(f)
-    {:error, :eof}
-  end
-  defp do_decrypt({:error, _} = error, f, _) do
-    File.close(f)
-    error
-  end
-  defp do_decrypt(<<1>>, f, key) do
-    <<tag_byte_size>> = IO.binread(f, 1)
-    tag = IO.binread(f, tag_byte_size)
-    <<iv_byte_size>> = IO.binread(f, 1)
-    iv = IO.binread(f, iv_byte_size)
-    cipher_text = IO.binread(f, :all)
+  defp do_decrypt(<<1, rest :: binary>>, keys) do
+    <<
+      tag_size :: size(8),
+      tag :: binary-size(tag_size),
+      iv_size :: size(8),
+      iv :: binary-size(iv_size),
+      cipher_text :: binary
+    >> = rest
 
-    case decrypt_data({cipher_text, tag}, key, iv) do
-      :error ->
-        {:error, :invalid_key}
-      data ->
-        {:ok, write_to_local_file(data)}
+    Enum.find_value keys, {:error, :invalid_key}, fn(key) ->
+      case decrypt_data({cipher_text, tag}, key, iv) do
+        :error ->
+          false
+        data ->
+          {:ok, write_to_local_file(data)}
+      end
     end
   end
-  defp do_decrypt(<<unsupported_version>>, f, _) do
-    File.close(f)
+  defp do_decrypt(<<unsupported_version :: size(8), _ :: binary>>, _) do
     raise("This version of ExfileEncryption doesn't support file format version #{unsupported_version}. Please upgrade.")
   end
 
@@ -49,5 +45,24 @@ defmodule ExfileEncryption.Decrypt do
       IO.binwrite(f, data)
     end
     %LocalFile{path: temp}
+  end
+
+  defp read_data(io) do
+    case IO.binread(io, :all) do
+      :eof -> {:error, :eof}
+      {:error, _} = error -> error
+      data -> {:ok, data}
+    end
+  end
+
+  defp keys_from_opts(opts) do
+    case Keyword.fetch(opts, :key) do
+      {:ok, key} -> [key]
+      :error ->
+        keys = Keyword.get(opts, :keys, [])
+        if length(keys) == 0,
+          do: raise(ArgumentError, message: "decrypt requires a key")
+        keys
+    end
   end
 end
