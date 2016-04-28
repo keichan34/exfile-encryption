@@ -51,7 +51,7 @@ defmodule ExfileEncryption.Mixfile do
 
   defp description do
     """
-    Encryption processors for Exfile.
+    Transparent backend encryption / decryption for Exfile.
     """
   end
 end
